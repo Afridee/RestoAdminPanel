@@ -27,7 +27,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   File _image;
   String imgURL;
 
-  //functions:
+  //Functions:
 
   //function 1
   Future getImage() async{
