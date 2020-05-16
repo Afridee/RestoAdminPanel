@@ -26,7 +26,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   bool showSpinner = false;
   File _image;
   String imgURL;
-  String push;
+
   //Functions:
 
   //function 1
