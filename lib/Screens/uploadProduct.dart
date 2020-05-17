@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:search_widget/search_widget.dart';
 
 class uploadProduct_page extends StatefulWidget {
   @override
@@ -26,6 +27,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   bool showSpinner = false;
   File _image;
   String imgURL;
+  var itemList = new List();
 
   //Functions:
 
@@ -71,7 +73,24 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       userID = user.uid;
     });
   }
+  //function 4
+  Future<void> getCurrentSupplies() async{
+    final CollectionReference supplies = Firestore.instance.collection('supplies');
 
+    await for(var snapshot in supplies.snapshots()){
+      for(var item in snapshot.documents){
+        itemList.add(item.data);
+      }
+      break;
+    }
+  }
+
+  @override
+  void initState() {
+    getUserID();
+    getCurrentSupplies();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
 
@@ -81,26 +100,39 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
     ]);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xffffffff),
+        elevation: 0.0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xffdd3572)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       backgroundColor: Colors.white,
       body: ModalProgressHUD(
         inAsyncCall: showSpinner,
         child: SingleChildScrollView(
           child: Container(
             child: Padding(
-              padding: EdgeInsets.all(30.0),
+              padding: EdgeInsets.only(left: 30,right: 30),
               child: Column(
                 children: <Widget>[
-                  SizedBox(height: 40),
                   InkWell(
                     onTap: getImage,
                     child: _image==null? Image(image: AssetImage(
                         'assets/images/addImage.png'),
-                      height: 100,
-                      width: 100,) : Image(image: FileImage(
+                      height: 70,
+                      width: 70,) : Image(image: FileImage(
                         _image),
-                      height: 100,
-                      width: 100,),
+                      height: 70,
+                      width: 70,),
                   ),
+                  SizedBox(height: 10,),
+                  Text('picture should have 1:1 ratio and suggested background color is white.', style: TextStyle(color: Colors.grey), textAlign: TextAlign.center,),
+                  SizedBox(height: 10,),
                   FadeAnimation(
                     1.8,
                     Container(
@@ -203,7 +235,8 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                     2,
                     InkWell(
                       onTap: () {
-                         uploadProduct(context);
+                         //uploadProduct(context);
+                        print(itemList);
                       },
                       child: Container(
                         height: 50,
