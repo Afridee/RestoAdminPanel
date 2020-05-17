@@ -18,16 +18,20 @@ class uploadProduct_page extends StatefulWidget {
 
 class _uploadProduct_pageState extends State<uploadProduct_page> {
   //variables:
-  String name;
+
   int qty;
   int price;
-  String desc;
+
   String password;
   String userID;
   bool showSpinner = false;
   File _image;
   String imgURL;
   var itemList = new List();
+  Icon custom_Icon = Icon(Icons.search);
+  Widget search_text = Text('');
+  TextEditingController name_controller;
+  TextEditingController desc_controller;
 
   //Functions:
 
@@ -36,34 +40,41 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = image;
+      imgURL = null;
     });
     print(basename(_image.path));
   }
   //function 2
   Future uploadProduct(BuildContext context) async{
-    String fileName = basename(_image.path);
-    StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('images/'+fileName);
-    StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
-    final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
-      print('EVENT ${event.type}');
-    });
-    String URL = await (await uploadTask.onComplete).ref.getDownloadURL();
+    if(imgURL==null){
+      String fileName = basename(_image.path);
+      StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('images/'+fileName);
+      StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
+      final StreamSubscription<StorageTaskEvent> streamSubscription = uploadTask.events.listen((event) {
+        print('EVENT ${event.type}');
+      });
+      String URL = await (await uploadTask.onComplete).ref.getDownloadURL();
 
-    streamSubscription.cancel();
-    setState((){
-      imgURL = URL;
-      print(imgURL);
-    });
+      streamSubscription.cancel();
+      setState((){
+        imgURL = URL;
+        print(imgURL);
+      });
+    }
 
     final CollectionReference supplies = Firestore.instance.collection('supplies');
 
-    await supplies.document(name).setData({
-      'name' : name,
-      'desc' : desc,
+    await supplies.document(name_controller.text).setData({
+      'name' : name_controller.text,
+      'desc' : desc_controller.text,
       'img' : imgURL,
       'price' : price,
       'qty' : qty,
     }, merge: true);
+
+    setState(() {
+      showSpinner = false;
+    });
   }
   //function 3
   Future<void> getUserID() async {
@@ -84,9 +95,56 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       break;
     }
   }
+  //function 5
+  void seacrchIconState(){
+    setState(() {
+      if (this.custom_Icon.icon == Icons.search) {
+        this.custom_Icon = Icon(Icons.cancel);
+        this.search_text = SearchWidget<dynamic>(
+          dataList: itemList,
+          queryBuilder: (String query, List<dynamic> list) {
+            return list.where((dynamic item) => item.username.toLowerCase().contains(query.toLowerCase())).toList();
+          },
+          popupListItemBuilder: (dynamic item) {
+            return InkWell(onTap: (){
+              resetTexts(item['name'], item['desc'], item['img']);
+            },child : PopupListItemWidget(item));
+          },
+          selectedItemBuilder: (dynamic selectedItem, VoidCallback deleteSelectedItem) {
+            return Container();
+          },
+          textFieldBuilder: (TextEditingController controller, FocusNode focusNode) {
+            return TextField(
+              controller: controller,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: "Search Here...",
+                  hintStyle: TextStyle(color: Colors.white),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(color: Colors.white, fontSize: 20));;
+          },
+        );
+      } else {
+        this.custom_Icon = Icon(Icons.search);
+        this.search_text = Text('');
+      }
+    });
+  }
+  //new function
+  void resetTexts(String name, String description, String imgURL){
+     setState(() {
+       name_controller.text = name;
+       desc_controller.text = description;
+       this.imgURL = imgURL;
+       _image = null;
+     });
+  }
 
   @override
   void initState() {
+    name_controller = new TextEditingController();
+    desc_controller = new TextEditingController();
     getUserID();
     getCurrentSupplies();
     super.initState();
@@ -99,22 +157,40 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       DeviceOrientation.portraitUp,
     ]);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xffffffff),
-        elevation: 0.0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xffdd3572)),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-      backgroundColor: Colors.white,
-      body: ModalProgressHUD(
-        inAsyncCall: showSpinner,
-        child: SingleChildScrollView(
+    return ModalProgressHUD(
+      inAsyncCall: showSpinner,
+      child: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [
+                          Color(0xffdd3572),
+                          Color(0xffdd3572),
+                        ]
+                    )
+                )
+            ),
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+            title: search_text,
+            actions: <Widget>[
+              IconButton(
+                icon: custom_Icon,
+                onPressed: () {
+                  seacrchIconState();
+                },
+              )
+            ],
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+          ),
+        backgroundColor: Colors.white,
+        body: SingleChildScrollView(
           child: Container(
             child: Padding(
               padding: EdgeInsets.only(left: 30,right: 30),
@@ -122,8 +198,8 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                 children: <Widget>[
                   InkWell(
                     onTap: getImage,
-                    child: _image==null? Image(image: AssetImage(
-                        'assets/images/addImage.png'),
+                    child: _image==null? Image(image: imgURL==null? AssetImage(
+                        'assets/images/addImage.png') : NetworkImage(imgURL),
                       height: 70,
                       width: 70,) : Image(image: FileImage(
                         _image),
@@ -155,11 +231,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                                     bottom: BorderSide(
                                         color: Colors.grey[100]))),
                             child: TextField(
-                              onChanged: (value) {
-                                setState(() {
-                                  name = value;
-                                });
-                              },
+                              controller: name_controller,
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "name",
@@ -194,7 +266,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                                     bottom: BorderSide(
                                         color: Colors.grey[100]))),
                             child: TextField(
-                                keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 setState(() {
                                   price = int.parse(value);
@@ -210,13 +282,9 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                           Container(
                             padding: EdgeInsets.all(8.0),
                             child: TextField(
-                             keyboardType: TextInputType.multiline,
+                              controller: desc_controller,
+                              keyboardType: TextInputType.multiline,
                               maxLines: 11,
-                              onChanged: (value) {
-                                setState(() {
-                                  desc = value;
-                                });
-                              },
                               decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: "description",
@@ -235,8 +303,11 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                     2,
                     InkWell(
                       onTap: () {
-                         //uploadProduct(context);
-                        print(itemList);
+                        setState(() {
+                          showSpinner = true;
+                        });
+                        uploadProduct(context);
+                        print(name_controller.text);
                       },
                       child: Container(
                         height: 50,
@@ -270,6 +341,23 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PopupListItemWidget extends StatelessWidget {
+  const PopupListItemWidget(this.item);
+
+  final dynamic item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: Text(
+        item['name'],
+        style: const TextStyle(fontSize: 16),
       ),
     );
   }
