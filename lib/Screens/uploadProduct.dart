@@ -18,10 +18,8 @@ class uploadProduct_page extends StatefulWidget {
 
 class _uploadProduct_pageState extends State<uploadProduct_page> {
   //variables:
-
   int qty;
   int price;
-
   String password;
   String userID;
   bool showSpinner = false;
@@ -131,7 +129,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       }
     });
   }
-  //new function
+  //function 6
   void resetTexts(String name, String description, String imgURL){
      setState(() {
        name_controller.text = name;

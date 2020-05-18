@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:restoadminpanel/Screens/uploadProduct.dart';
 import 'package:provider/provider.dart';
+import 'package:restoadminpanel/Screens/Records.dart';
 
 class login_page extends StatefulWidget {
   @override
@@ -42,7 +43,7 @@ class _login_pageState extends State<login_page> {
         final FirebaseUser user = await auth.currentUser();
         userID = user.uid;
         var route = new MaterialPageRoute(
-          builder: (BuildContext context) => new uploadProduct_page(),
+          builder: (BuildContext context) => new RecordDataTable(),
         );
         Navigator.of(context).push(route);
         setState(
