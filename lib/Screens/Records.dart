@@ -52,7 +52,7 @@ class _RecordDataTableState extends State<RecordDataTable> {
     new Picker(
         adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(stat_arr), isArray: true),
         hideHeader: true,
-        title: new Text("Please Select"),
+        title: new Text("Status:"),
         onConfirm: (Picker picker, List value) {
            setState(() {
              showOnly  = picker.getSelectedValues().toString();
@@ -113,18 +113,18 @@ class _RecordDataTableState extends State<RecordDataTable> {
               ),
             ),
             SizedBox(height: 20.0),
-            Center(
-                child: Text(
-              'From:',
-              style: TextStyle(
-                  fontSize: 30,
-                  color: Color(0xffdd3572),
-                  fontWeight: FontWeight.bold),
-            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(width: 28.0),
+                Text(
+                  'From:',
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: Color(0xffdd3572),
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(width: 10.0),
                 Text('${from.year}-${from.month}-${from.day}',
                     style: TextStyle(
                       fontSize: 25,
@@ -155,18 +155,18 @@ class _RecordDataTableState extends State<RecordDataTable> {
               ],
             ),
             SizedBox(height: 10.0),
-            Center(
-                child: Text(
-              'To:',
-              style: TextStyle(
-                  fontSize: 30,
-                  color: Color(0xffdd3572),
-                  fontWeight: FontWeight.bold),
-            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SizedBox(width: 28.0),
+                Text(
+                  'To:',
+                  style: TextStyle(
+                      fontSize: 30,
+                      color: Color(0xffdd3572),
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(width: 10.0),
                 Text('${to.year}-${to.month}-${to.day}',
                     style: TextStyle(
                       fontSize: 25,
@@ -207,7 +207,15 @@ class _RecordDataTableState extends State<RecordDataTable> {
                 showPickerArray(context);
               },
               child: Container(
-                child: Icon(Icons.more_horiz, color: Colors.black, size: 30,),
+                child: Center(
+                  child: Text(
+                    showOnly!=null? 'Status: ${showOnly}' : 'Status: [All]',
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Color(0xffdd3572),
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: 15.0),
@@ -243,29 +251,23 @@ class _RecordDataTableState extends State<RecordDataTable> {
                                       var stuffs = snapshot2.data;
                                       if(showOnly!=null && showOnly!='' && '[${stuffs['status']}]'==showOnly){
                                         return RecordItemBuild(
+                                          order: snapshot.data.documents[index]
+                                          ['orderReference'],
+                                          userInfo: snapshot.data.documents[index]['userInfo'],
                                           timestamp: stuffs
                                           ['time'],
                                           OrderStatus: stuffs
                                           ['status'],
-                                          totalCost: stuffs
-                                          ['totalCost'],
-                                          Note: stuffs
-                                          ['Notes'],
-                                          list: stuffs
-                                          ['items'],
                                         );
                                       }else if(showOnly==null || showOnly==''){
                                         return RecordItemBuild(
+                                          order: snapshot.data.documents[index]
+                                          ['orderReference'],
+                                          userInfo: snapshot.data.documents[index]['userInfo'],
                                           timestamp: stuffs
                                           ['time'],
                                           OrderStatus: stuffs
-                                          ['status'],
-                                          totalCost: stuffs
-                                          ['totalCost'],
-                                          Note: stuffs
-                                          ['Notes'],
-                                          list: stuffs
-                                          ['items'],
+                                          ['status']
                                         );
                                       }
                                     }
@@ -300,13 +302,12 @@ class _RecordDataTableState extends State<RecordDataTable> {
 class RecordItemBuild extends StatefulWidget {
   final Timestamp timestamp;
   final String OrderStatus;
-  final List list;
-  final int totalCost;
-  final String Note;
+  final Map<String, dynamic> userInfo;
+  final DocumentReference order;
 
   const RecordItemBuild({
     Key key,
-    this.timestamp, this.OrderStatus, this.list, this.totalCost, this.Note
+    this.timestamp, this.OrderStatus, this.userInfo, this.order
   }) : super(key: key);
 
   @override
@@ -319,7 +320,7 @@ class _RecordItemBuildState extends State<RecordItemBuild> {
     return InkWell(
       onTap: (){
         var route = new MaterialPageRoute(
-          builder: (BuildContext context) => new recieptPage(OrderStatus: widget.OrderStatus, list: widget.list, Note: widget.Note, totalCost: widget.totalCost,),
+          builder: (BuildContext context) => new recieptPage(userInfo: widget.userInfo, order: widget.order),
         );
         Navigator.of(context).push(route);
       },
@@ -341,7 +342,7 @@ class _RecordItemBuildState extends State<RecordItemBuild> {
             leading: Icon(Icons.description, size: 40, color: Color(0xffdd3572),),
             title: Container(
                 child: AutoSizeText(
-              '${widget.timestamp.toDate().toString()}' ,
+              widget.userInfo['name'] ,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                   fontSize: 20,
