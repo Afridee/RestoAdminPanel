@@ -352,8 +352,7 @@ class _recieptItemState extends State<recieptItem> {
       }
 
       //and finally setting the data
-      await widget.order
-          .setData({'items': itemList, 'totalCost': totalCost}, merge: true);
+      await widget.order.setData({'items': itemList, 'totalCost': totalCost}, merge: true);
     }
   }
 

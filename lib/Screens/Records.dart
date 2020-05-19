@@ -79,22 +79,6 @@ class _RecordDataTableState extends State<RecordDataTable> {
     ]);
 
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [Color(0xffffffff), Color(0xffffffff)])),
-        ),
-        elevation: 0.0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: Icon(Icons.arrow_back_ios),
-          color: Colors.grey,
-        ),
-      ),
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(

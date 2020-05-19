@@ -10,6 +10,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:search_widget/search_widget.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:restoadminpanel/Screens/register_user.dart';
+import 'package:restoadminpanel/Screens/Records.dart';
+import 'package:restoadminpanel/Screens/login_screen.dart';
+import 'package:connectivity/connectivity.dart';
+
 
 class uploadProduct_page extends StatefulWidget {
   @override
@@ -30,6 +36,14 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   Widget search_text = Text('');
   TextEditingController name_controller;
   TextEditingController desc_controller;
+  TextEditingController qty_controller;
+  TextEditingController price_controller;
+  PageController pageController;
+  int pageIndex = 1;
+  Connectivity connectivity;
+  StreamSubscription<ConnectivityResult> subscription;
+  bool connectedToInternet = true;
+
 
   //Functions:
 
@@ -44,7 +58,8 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   }
   //function 2
   Future uploadProduct(BuildContext context) async{
-    if(imgURL==null){
+
+    if(imgURL==null && _image!=null){
       String fileName = basename(_image.path);
       StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('images/'+fileName);
       StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
@@ -62,17 +77,30 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
 
     final CollectionReference supplies = Firestore.instance.collection('supplies');
 
-    await supplies.document(name_controller.text).setData({
-      'name' : name_controller.text,
-      'desc' : desc_controller.text,
-      'img' : imgURL,
-      'price' : price,
-      'qty' : qty,
-    }, merge: true);
+    if(name_controller.text.length>0 && qty_controller.text.length>0 && price_controller.text.length>0 && desc_controller.text.length>0 && connectedToInternet && _image!=null){
+      await supplies.document(name_controller.text).setData({
+        'name' : name_controller.text,
+        'desc' : desc_controller.text,
+        'img' : imgURL,
+        'price' : price,
+        'qty' : qty,
+      }, merge: true);
+      setState(() {
+        showSpinner = false;
+      });
+    }else if(connectedToInternet){
+      _showDialog('Empty fields!', 'Please fill up all the fields or upload an image if you have not');
+      setState(() {
+        showSpinner = false;
+      });
+    }
 
-    setState(() {
-      showSpinner = false;
-    });
+    if(!connectedToInternet){
+      _showDialog('No Internet!', 'Please check your internet connection');
+      setState(() {
+        showSpinner = false;
+      });
+    }
   }
   //function 3
   Future<void> getUserID() async {
@@ -138,11 +166,68 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
        _image = null;
      });
   }
+  //function 7
+  navBarOnTap(int pageIndex) {
+    pageController.animateToPage(
+      pageIndex,
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeIn,
+    );
+  }
+  //function 8
+  onPageChanged(int pageIndex) {
+    if (!mounted) return;
+    setState(() {
+      this.pageIndex = pageIndex;
+    });
+  }
+  //function 9
+  void _showDialog(String Title, String content) {
+    // flutter defined function
+    showDialog(
+      context: this.context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(Title, style: TextStyle(fontSize: 30, color: Colors.white, fontFamily: 'Varela'),),
+          content: new Text(content, style: TextStyle(fontSize: 15, color: Colors.white, fontFamily: 'Varela'),),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("OK", style: TextStyle(fontSize: 17, color: Colors.white, fontFamily: 'Varela', fontWeight: FontWeight.bold), ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+          backgroundColor: Color(0xffdd3572),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20.0))
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
+    connectivity = new Connectivity();
+    subscription = connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+      if(result == ConnectivityResult.wifi || result == ConnectivityResult.mobile){
+        setState(() {
+          connectedToInternet = true;
+        });
+      }else if(result == ConnectivityResult.none){
+        setState(() {
+          connectedToInternet = false;
+        });
+      }
+    });
+    pageController = PageController(initialPage: 1);
     name_controller = new TextEditingController();
     desc_controller = new TextEditingController();
+    price_controller = new TextEditingController();
+    qty_controller = new TextEditingController();
     getUserID();
     getCurrentSupplies();
     super.initState();
@@ -180,164 +265,201 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                 },
               )
             ],
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
+            leading: IconButton(
+              icon : Icon(Icons.power_settings_new),
+              onPressed: () async{
+                final auth = FirebaseAuth.instance;
+                await auth.signOut();
+                var route = new MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                  new login_page(),
+                );
+                Navigator.of(context).push(route);
+              },
+            ),
           ),
         backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Container(
-            child: Padding(
-              padding: EdgeInsets.only(left: 30,right: 30),
-              child: Column(
-                children: <Widget>[
-                  InkWell(
-                    onTap: getImage,
-                    child: _image==null? Image(image: imgURL==null? AssetImage(
-                        'assets/images/addImage.png') : NetworkImage(imgURL),
-                      height: 70,
-                      width: 70,) : Image(image: FileImage(
-                        _image),
-                      height: 70,
-                      width: 70,),
-                  ),
-                  SizedBox(height: 10,),
-                  Text('picture should have 1:1 ratio and suggested background color is white.', style: TextStyle(color: Colors.grey), textAlign: TextAlign.center,),
-                  SizedBox(height: 10,),
-                  FadeAnimation(
-                    1.8,
-                    Container(
-                      padding: EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Color.fromRGBO(143, 148, 251, .2),
-                                blurRadius: 20.0,
-                                offset: Offset(0, 10))
-                          ]),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey[100]))),
-                            child: TextField(
-                              controller: name_controller,
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "name",
-                                  hintStyle:
-                                  TextStyle(color: Colors.grey[400])),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey[100]))),
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  qty = int.parse(value);
-                                });
-                              },
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "qty",
-                                  hintStyle:
-                                  TextStyle(color: Colors.grey[400])),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey[100]))),
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  price = int.parse(value);
-                                });
-                              },
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "price",
-                                  hintStyle:
-                                  TextStyle(color: Colors.grey[400])),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            child: TextField(
-                              controller: desc_controller,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: 11,
-                              decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "description",
-                                  hintStyle:
-                                  TextStyle(color: Colors.grey[400])),
-                            ),
-                          )
-                        ],
+        body: PageView(
+          children: <Widget>[
+            registration_page(),
+            SingleChildScrollView(
+              child: Container(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 30,right: 30),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 10),
+                      InkWell(
+                        onTap: getImage,
+                        child: _image==null? Image(image: imgURL==null? AssetImage(
+                            'assets/images/addImage.png') : NetworkImage(imgURL),
+                          height: 100,
+                          width: 100,) : Image(image: FileImage(
+                            _image),
+                          height: 100,
+                          width: 100,),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  FadeAnimation(
-                    2,
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          showSpinner = true;
-                        });
-                        uploadProduct(context);
-                        print(name_controller.text);
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: LinearGradient(colors: [
-                              Color(0xffdd3572),
-                              Color(0xfff9b294),
-                            ]),
-                            boxShadow: [
-                              BoxShadow(
-                                  spreadRadius: 2,
-                                  blurRadius: 10,
-                                  color: Color(0xffdd3572).withOpacity(0.1),
-                                  offset: Offset(0, 10))
-                            ]),
-                        child: Center(
-                          child: Text(
-                            "Upload",
-                            style: TextStyle(
+                      SizedBox(height: 10,),
+                      Text('picture should have 1:1 ratio and suggested background color is white.', style: TextStyle(color: Colors.grey), textAlign: TextAlign.center,),
+                      SizedBox(height: 10,),
+                      FadeAnimation(
+                        1.8,
+                        Container(
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Color.fromRGBO(143, 148, 251, .2),
+                                    blurRadius: 20.0,
+                                    offset: Offset(0, 10))
+                              ]),
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  controller: name_controller,
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "name",
+                                      hintStyle:
+                                      TextStyle(color: Colors.grey[400])),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  controller: qty_controller,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      qty = int.parse(value);
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "qty",
+                                      hintStyle:
+                                      TextStyle(color: Colors.grey[400])),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  controller: price_controller,
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      price = int.parse(value);
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "price",
+                                      hintStyle:
+                                      TextStyle(color: Colors.grey[400])),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                child: TextField(
+                                  controller: desc_controller,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 11,
+                                  decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "description",
+                                      hintStyle:
+                                      TextStyle(color: Colors.grey[400])),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      FadeAnimation(
+                        2,
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              showSpinner = true;
+                            });
+                            uploadProduct(context);
+                            print(name_controller.text);
+                          },
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                gradient: LinearGradient(colors: [
+                                  Color(0xffdd3572),
+                                  Color(0xfff9b294),
+                                ]),
+                                boxShadow: [
+                                  BoxShadow(
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                      color: Color(0xffdd3572).withOpacity(0.1),
+                                      offset: Offset(0, 10))
+                                ]),
+                            child: Center(
+                              child: Text(
+                                "Upload",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
+            RecordDataTable()
+          ],
+          controller: pageController,
+          onPageChanged: onPageChanged,
+          physics: NeverScrollableScrollPhysics(),
+        ),
+        bottomNavigationBar: CurvedNavigationBar(
+          index: 1,
+          color: Color(0xffdd3572),
+          backgroundColor: Colors.white,
+          buttonBackgroundColor: Color(0xfff9b294),
+          height: 50,
+          items: <Widget>[
+            Icon(Icons.library_add, size: 30, color: Colors.white),
+            Icon(Icons.account_circle, size: 30, color: Colors.white),
+            Icon(Icons.shopping_cart, size: 30, color: Colors.white)
+          ],
+          animationDuration: Duration(
+              milliseconds: 200
           ),
+          animationCurve: Curves.bounceInOut,
+          onTap: (index){
+            navBarOnTap(index);
+          },
         ),
       ),
     );

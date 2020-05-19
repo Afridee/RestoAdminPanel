@@ -6,64 +6,24 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:restoadminpanel/Screens/uploadProduct.dart';
 import 'package:provider/provider.dart';
 import 'package:restoadminpanel/Screens/Records.dart';
-import 'package:restoadminpanel/Screens/register_user.dart';
 
-
-class login_page extends StatefulWidget {
+class registration_page extends StatefulWidget {
   @override
-  _login_pageState createState() => _login_pageState();
+  _registration_pageState createState() => _registration_pageState();
 }
 
-class _login_pageState extends State<login_page> {
+class _registration_pageState extends State<registration_page> {
   //variables:
   String email;
   String password;
   String userID;
-  bool loogedIn = false;
+  bool Registered = false;
   bool showSpinner = false;
-  String loginError = '';
+
 
   //functions:
 
   //function 1
-  Future<void> login() async {
-    try {
-      setState(
-        () {
-          showSpinner = true;
-        },
-      );
-      final auth = FirebaseAuth.instance;
-      final user = await auth.signInWithEmailAndPassword(
-          email: email, password: password);
-      if (user != null) {
-        setState(
-          () {
-            loogedIn = true;
-          },
-        );
-        final FirebaseUser user = await auth.currentUser();
-        userID = user.uid;
-        var route = new MaterialPageRoute(
-          builder: (BuildContext context) => new uploadProduct_page(),
-        );
-        Navigator.of(context).push(route);
-        setState(
-          () {
-            showSpinner = false;
-          },
-        );
-      }
-    } catch (e) {
-      print(e.message);
-      setState(
-        () {
-          showSpinner = false;
-          loginError = e.message;
-        },
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,67 +40,18 @@ class _login_pageState extends State<login_page> {
           child: Container(
             child: Column(
               children: <Widget>[
-                Container(
-                  height: 400,
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                        right: MediaQuery.of(context).size.width / 2 - 130,
-                        top: 90,
-                        width: 200,
-                        height: 200,
-                        child: FadeAnimation(
-                            1.5,
-                            Container(
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/images/Resto_logo.png'))),
-                            )),
-                      ),
-                      Positioned(
-                        top: 270,
-                        right: MediaQuery.of(context).size.width / 2 - 70,
-                        child: FadeAnimation(
-                          1.6,
-                          Container(
-                            margin: EdgeInsets.only(top: 30),
-                            child: Center(
-                              child: Text(
-                                "Resto",
-                                style: TextStyle(
-                                    color: Color(0xffdd3572),
-                                    fontSize: 60,
-                                    fontFamily: 'Lucy the Cat'),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 350,
-                        right: MediaQuery.of(context).size.width / 2 - 65,
-                        child: FadeAnimation(
-                          1.6,
-                          Container(
-                            margin: EdgeInsets.only(top: 30),
-                            child: Center(
-                              child: Text(
-                                "Admin Panel",
-                                style: TextStyle(
-                                    color: Color(0xffdd3572),
-                                    fontSize: 20,
-                                  fontFamily: 'Varela',
-                                  fontWeight: FontWeight.bold
-                                   ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+            Container(
+            margin: EdgeInsets.only(top: 9),
+            child: Center(
+              child: Text(
+                "Register",
+                style: TextStyle(
+                    color: Color(0xffdd3572),
+                    fontSize: 60,
+                    fontFamily: 'Lucy the Cat'),
+              ),
+            ),
+          ),
                 Padding(
                   padding: EdgeInsets.all(30.0),
                   child: Column(
@@ -170,6 +81,67 @@ class _login_pageState extends State<login_page> {
                                   keyboardType: TextInputType.emailAddress,
                                   onChanged: (value) {
                                     setState(() {
+                                      //
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Name",
+                                    hintStyle:
+                                    TextStyle(color: Colors.grey[400],),),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 3,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      //
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Adress",
+                                    hintStyle:
+                                    TextStyle(color: Colors.grey[400],),),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      //
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Cell",
+                                    hintStyle:
+                                    TextStyle(color: Colors.grey[400],),),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: Colors.grey[100]))),
+                                child: TextField(
+                                  keyboardType: TextInputType.emailAddress,
+                                  onChanged: (value) {
+                                    setState(() {
                                       email = value;
                                     });
                                   },
@@ -177,7 +149,7 @@ class _login_pageState extends State<login_page> {
                                       border: InputBorder.none,
                                       hintText: "Email",
                                       hintStyle:
-                                          TextStyle(color: Colors.grey[400])),
+                                      TextStyle(color: Colors.grey[400],),),
                                 ),
                               ),
                               Container(
@@ -187,13 +159,13 @@ class _login_pageState extends State<login_page> {
                                   onChanged: (value) {
                                     setState(() {
                                       password = value;
-                                    });
+                                    },);
                                   },
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Password",
                                       hintStyle:
-                                          TextStyle(color: Colors.grey[400])),
+                                      TextStyle(color: Colors.grey[400],),),
                                 ),
                               )
                             ],
@@ -207,7 +179,7 @@ class _login_pageState extends State<login_page> {
                         2,
                         InkWell(
                           onTap: () {
-                            login();
+
                           },
                           child: Container(
                             height: 50,
@@ -232,22 +204,6 @@ class _login_pageState extends State<login_page> {
                       SizedBox(
                         height: 20,
                       ),
-                      Text(loginError,
-                          style: TextStyle(
-                              color: Color(0xffdd3572), fontSize: 10.0)),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      FadeAnimation(
-                        1.5,
-                        InkWell(
-                          child: Text(
-                            "Forgot Password?",
-                            style: TextStyle(color: Color(0xffdd3572)),
-                          ),
-                          onTap: () {},
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -256,7 +212,6 @@ class _login_pageState extends State<login_page> {
           ),
         ),
       ),
-
     );
   }
 }
