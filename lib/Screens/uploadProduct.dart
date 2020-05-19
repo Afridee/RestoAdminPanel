@@ -58,7 +58,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
   }
   //function 2
   Future uploadProduct(BuildContext context) async{
-
+    //sets the image url for manually selected image
     if(imgURL==null && _image!=null){
       String fileName = basename(_image.path);
       StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('images/'+fileName);
@@ -74,10 +74,10 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
         print(imgURL);
       });
     }
-
+    //supplies collection reference
     final CollectionReference supplies = Firestore.instance.collection('supplies');
-
-    if(name_controller.text.length>0 && qty_controller.text.length>0 && price_controller.text.length>0 && desc_controller.text.length>0 && connectedToInternet && _image!=null){
+    //updating produt
+    if(name_controller.text.length>0 && qty_controller.text.length>0 && price_controller.text.length>0 && desc_controller.text.length>0 && connectedToInternet && (_image!=null || imgURL!=null)){
       await supplies.document(name_controller.text).setData({
         'name' : name_controller.text,
         'desc' : desc_controller.text,
@@ -88,14 +88,22 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       setState(() {
         showSpinner = false;
       });
+      //shows succeess dialogue
       _showDialog('Success!', 'Product uploaded successfully');
+      //resets to empty
+      name_controller.text = '';
+      qty_controller.text = '';
+      price_controller.text = '';
+      desc_controller.text = '';
+      _image = null;
+      imgURL = null;
     }else if(connectedToInternet){
       _showDialog('Empty fields!', 'Please fill up all the fields or upload an image if you have not');
       setState(() {
         showSpinner = false;
       });
     }
-
+    //Internet Connection notice
     if(!connectedToInternet){
       _showDialog('No Internet!', 'Please check your internet connection');
       setState(() {
