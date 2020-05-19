@@ -88,6 +88,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       setState(() {
         showSpinner = false;
       });
+      _showDialog('Success!', 'Product uploaded successfully');
     }else if(connectedToInternet){
       _showDialog('Empty fields!', 'Please fill up all the fields or upload an image if you have not');
       setState(() {
