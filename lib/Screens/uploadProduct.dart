@@ -458,9 +458,9 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
           buttonBackgroundColor: Color(0xfff9b294),
           height: 50,
           items: <Widget>[
+            Icon(Icons.person_add, size: 30, color: Colors.white),
             Icon(Icons.library_add, size: 30, color: Colors.white),
-            Icon(Icons.account_circle, size: 30, color: Colors.white),
-            Icon(Icons.shopping_cart, size: 30, color: Colors.white)
+            Icon(Icons.receipt, size: 30, color: Colors.white)
           ],
           animationDuration: Duration(
               milliseconds: 200

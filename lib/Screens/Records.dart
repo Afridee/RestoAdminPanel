@@ -82,7 +82,7 @@ class _RecordDataTableState extends State<RecordDataTable> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-           color: Colors.white
+           color: Color(0xffdd3572)
         ),
         child: ListView(
           shrinkWrap: true,
@@ -105,14 +105,15 @@ class _RecordDataTableState extends State<RecordDataTable> {
                   'From:',
                   style: TextStyle(
                       fontSize: 30,
-                      color: Color(0xffdd3572),
+                      color: Color(0xfff9b294),
                       fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 10.0),
                 Text('${from.year}-${from.month}-${from.day}',
                     style: TextStyle(
                       fontSize: 25,
-                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     )),
                 IconButton(
                   icon: Icon(Icons.edit),
@@ -147,14 +148,15 @@ class _RecordDataTableState extends State<RecordDataTable> {
                   'To:',
                   style: TextStyle(
                       fontSize: 30,
-                      color: Color(0xffdd3572),
+                      color: Color(0xfff9b294),
                       fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 10.0),
                 Text('${to.year}-${to.month}-${to.day}',
                     style: TextStyle(
                       fontSize: 25,
-                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     )),
                 IconButton(
                   icon: Icon(Icons.edit),
@@ -195,8 +197,8 @@ class _RecordDataTableState extends State<RecordDataTable> {
                   child: Text(
                     showOnly!=null? 'Status: ${showOnly}' : 'Status: [All]',
                     style: TextStyle(
-                        fontSize: 20,
-                        color: Color(0xffdd3572),
+                        fontSize: 15,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -206,7 +208,7 @@ class _RecordDataTableState extends State<RecordDataTable> {
             Container(
               height: MediaQuery.of(context).size.height - 290.0,
               decoration: BoxDecoration(
-                color:Color(0xfff29c81),
+                color:Colors.white,
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(30.0),
                   topLeft: Radius.circular(30.0),
