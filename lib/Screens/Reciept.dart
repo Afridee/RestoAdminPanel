@@ -95,6 +95,34 @@ class _recieptPageState extends State<recieptPage> {
             ),
             SizedBox(height: 20),
             Center(
+                child: Text(
+                  'Resturant: ' + widget.userInfo['name'],
+                  style: TextStyle(
+                      fontSize: 20,
+                      color: Color(0xffffffff),
+                      fontWeight: FontWeight.bold),
+                ),),
+            SizedBox(height: 10),
+            Center(
+              child: Text(
+                'Cell: ' + widget.userInfo['cell'],
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Color(0xffffffff),
+                    fontWeight: FontWeight.bold),
+              ),),
+            SizedBox(height: 10),
+            Center(
+              child: Text(
+                'Address: ' + widget.userInfo['location'],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Color(0xffffffff),
+                    fontWeight: FontWeight.bold),
+              ),),
+            SizedBox(height: 20),
+            Center(
                 child: StreamBuilder(
                     stream: widget.order.snapshots(),
                     builder: (context, snapshot) {
