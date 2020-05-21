@@ -97,6 +97,8 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
       desc_controller.text = '';
       _image = null;
       imgURL = null;
+      //updates Search Datalist
+      getCurrentSupplies();
     }else if(connectedToInternet){
       _showDialog('Empty fields!', 'Please fill up all the fields or upload an image if you have not');
       setState(() {
@@ -440,6 +442,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 30)
                     ],
                   ),
                 ),

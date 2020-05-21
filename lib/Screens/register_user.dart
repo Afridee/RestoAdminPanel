@@ -40,6 +40,9 @@ class _registration_pageState extends State<registration_page> {
        });
      }catch(e){
        _showDialog('Error!', e.message);
+       setState(() {
+         showSpinner = false;
+       });
      }
   }
   //function 2
@@ -78,6 +81,8 @@ class _registration_pageState extends State<registration_page> {
         location_controller.text.length>0 &&
         email_controller.text.length>0 &&
         password_controller.text.length>0 && connectedToInternet){
+
+      //setting new User Data:
       await newUseDoc.setData({
         'name': name_controller.text,
         'cell': cell_controller.text,
@@ -88,14 +93,30 @@ class _registration_pageState extends State<registration_page> {
       setState(() {
         newUserID = null;
       });
+      //stopping the spinner
+      setState(() {
+        showSpinner = false;
+      });
+      //notifying about empty field:
     }else if(connectedToInternet){
       _showDialog('Fillup all the fields!', 'leave no  text field empty...');
+      setState(() {
+        showSpinner = false;
+      });
     }
-
+    //checks if connected to internet:
     if(!connectedToInternet){
       _showDialog('Network Error!', 'Check your internet connecton');
+      setState(() {
+        showSpinner = false;
+      });
     }
-
+    //resets everything:
+    name_controller.text = '';
+    email_controller.text = '';
+    location_controller.text = '';
+    cell_controller.text = '';
+    password_controller.text = '';
   }
 
   @override
@@ -254,6 +275,10 @@ class _registration_pageState extends State<registration_page> {
                         2,
                         InkWell(
                           onTap: () async {
+                              setState(() {
+                                showSpinner = true;
+                              });
+
                               await signUp(email_controller.text, password_controller.text);
 
                               if(newUserID!=null){

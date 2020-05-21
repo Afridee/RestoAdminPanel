@@ -19,8 +19,8 @@ class RecordDataTable extends StatefulWidget {
 class _RecordDataTableState extends State<RecordDataTable> {
   //variables:
   String userID = '';
-  DateTime from = DateTime.parse("2019-07-20 20:18:04");
-  DateTime to = DateTime.parse("2019-07-20 20:18:04");
+  DateTime from = DateTime.parse("2020-01-01 20:18:04");
+  DateTime to = DateTime.now();
   ScrollController _scrollController = new ScrollController();
   String showOnly;
   var stat_arr = '''

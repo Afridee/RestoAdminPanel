@@ -6,7 +6,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:restoadminpanel/Screens/uploadProduct.dart';
 import 'package:provider/provider.dart';
 import 'package:restoadminpanel/Screens/Records.dart';
-import 'package:restoadminpanel/Screens/register_user.dart';
+import 'package:restoadminpanel/Screens/resetPassword.dart';
 
 
 class login_page extends StatefulWidget {
@@ -242,10 +242,15 @@ class _login_pageState extends State<login_page> {
                         1.5,
                         InkWell(
                           child: Text(
-                            "Forgot Password?",
+                            "Forgot/Wanna Reset Password?",
                             style: TextStyle(color: Color(0xffdd3572)),
                           ),
-                          onTap: () {},
+                          onTap: () {
+                            var route = new MaterialPageRoute(
+                              builder: (BuildContext context) => new resetPasswordPage(title: 'Reset Password', img: 'assets/images/forgot_pasword.png'),
+                            );
+                            Navigator.of(context).push(route);
+                          },
                         ),
                       ),
                     ],
