@@ -390,7 +390,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
                                 child: TextField(
                                   controller: desc_controller,
                                   keyboardType: TextInputType.multiline,
-                                  maxLines: 11,
+                                  maxLines: 4,
                                   decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "description",

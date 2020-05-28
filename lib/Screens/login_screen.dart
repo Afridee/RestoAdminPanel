@@ -236,7 +236,7 @@ class _login_pageState extends State<login_page> {
                           style: TextStyle(
                               color: Color(0xffdd3572), fontSize: 10.0)),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       FadeAnimation(
                         1.5,

@@ -42,9 +42,19 @@ class _recieptPageState extends State<recieptPage> {
         adapter: PickerDataAdapter<String>(pickerdata: new JsonDecoder().convert(stat_arr), isArray: true),
         hideHeader: true,
         title: new Text("Status:"),
-        onConfirm: (Picker picker, List value) {
+        onConfirm: (Picker picker, List value) async{
           setState(() {
             status = picker.getSelectedValues().toString().replaceAll('[', '').replaceAll(']', '');
+          });
+          await widget.order.setData({
+            'status'  : status
+          }, merge: true);
+
+          final CollectionReference pushNotes = Firestore.instance.collection('pushNotes');
+
+          await pushNotes.document().setData({
+            'fcmToken' : widget.userInfo['fcmToken'],
+            'status' : status
           });
         }
     ).showDialog(context);
@@ -53,7 +63,6 @@ class _recieptPageState extends State<recieptPage> {
   updateStatusAndNote(){
     widget.order.setData({
       'Notes': note,
-      'status'  : status
     }, merge: true);
   }
 
