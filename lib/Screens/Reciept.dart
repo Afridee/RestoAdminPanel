@@ -60,10 +60,17 @@ class _recieptPageState extends State<recieptPage> {
     ).showDialog(context);
   }
   //function 2:
-  updateStatusAndNote(){
-    widget.order.setData({
+  updateStatusAndNote() async{
+    await widget.order.setData({
       'Notes': note,
     }, merge: true);
+
+    final CollectionReference pushNotes = Firestore.instance.collection('pushNotes');
+
+    await pushNotes.document().setData({
+      'fcmToken' : widget.userInfo['fcmToken'],
+      'status' : '${status}.Reason: ${note}'
+    });
   }
 
   @override
