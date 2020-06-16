@@ -140,7 +140,7 @@ class _uploadProduct_pageState extends State<uploadProduct_page> {
         this.search_text = SearchWidget<dynamic>(
           dataList: itemList,
           queryBuilder: (String query, List<dynamic> list) {
-            return list.where((dynamic item) => item.username.toLowerCase().contains(query.toLowerCase())).toList();
+            return list.where((dynamic item) => item['name'].toLowerCase().contains(query.toLowerCase())).toList();
           },
           popupListItemBuilder: (dynamic item) {
             return InkWell(onTap: (){
